@@ -1,5 +1,6 @@
 
 from django.db import models, transaction
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
@@ -45,6 +46,22 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    # จัดการกรณีลบสินค้าที่มีประวัติธุรกรรม
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "ไม่สามารถลบสินค้านี้ได้ "
+                        "เนื่องจากมีประวัติการรับเข้า-เบิกออกสินค้าอยู่"
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    # รับสินค้าเข้าและเบิกสินค้าออก
     def stock_movement(self, request, pk, movement_type):
         movement_serializer = StockMovementSerializer(
             data=request.data
