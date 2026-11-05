@@ -117,6 +117,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
+        ssl_require=not DEBUG,
     )
 }
 
@@ -158,7 +159,7 @@ USE_TZ = True
 # STATIC FILES
 # ==========================================
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
