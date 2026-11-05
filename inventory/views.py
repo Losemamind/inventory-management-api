@@ -1,12 +1,13 @@
 
-from django.db import transaction
+from django.db import models, transaction
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db import models, transaction
+
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from accounts.permissions import IsAdminOrReadOnly
 
@@ -113,6 +114,20 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='stock-out')
     def stock_out(self, request, pk=None):
         return self.stock_movement(request, pk, 'OUT')
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='low_stock',
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                description='กรองสินค้าที่มีจำนวนคงเหลือต่ำกว่าหรือเท่ากับ Min Stock',
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 # ดูประวัติการรับเข้าและเบิกออก
